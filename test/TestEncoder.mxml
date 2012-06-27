@@ -1,0 +1,55 @@
+<!-- 
+	write a binary file with custom types.
+	AIR require to be able to write a local file
+	to run it:
+		amxmlc TestEncoder.xml
+		adl TestEncodeAS3.xml
+-->
+<?xml version="1.0" encoding="utf-8"?>
+<mx:WindowedApplication xmlns:fx="http://ns.adobe.com/mxml/2009" 
+						xmlns:s="library://ns.adobe.com/flex/spark" 
+						xmlns:mx="library://ns.adobe.com/flex/mx"
+						layout="absolute"
+						width="1024"
+						height="768"
+						applicationComplete="_ready()">
+	<fx:Script>
+		<![CDATA[
+			import flash.desktop.NativeApplication;
+			import flash.utils.ByteArray;
+			import flash.filesystem.*
+			
+			private function _ready():void {
+				var b:ByteArray = new ByteArray();
+				b.writeByte(-128);
+				b.writeByte(0);
+				b.writeByte(110);
+				b.writeByte(127);
+
+				b.writeShort(-32768);
+				b.writeShort(0);
+				b.writeShort(32767);
+				
+				b.writeInt(-2147483648);
+				b.writeInt(0);
+				b.writeInt(2147483647);
+				
+				b.writeUnsignedInt(0);															
+				b.writeUnsignedInt(3000000000);
+				b.writeUnsignedInt(4294967295);
+
+
+				// write the file in desktop to be sure not to have rights issues
+				var file:File = File.desktopDirectory.resolvePath("bas3.dat");
+											
+				var fs:FileStream = new FileStream();
+				fs.open(file, FileMode.WRITE);
+				fs.writeBytes(b);
+				fs.close();
+				file.downloaded = true;
+				
+				NativeApplication.nativeApplication.exit();
+			}
+		]]>
+	</fx:Script>
+</mx:WindowedApplication>
