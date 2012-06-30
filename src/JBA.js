@@ -39,7 +39,10 @@
 	exports.JBA = function(input) {
 		
 		
-		// all the min / max variable are set in the JPA object scope to be available outside
+		// all the info variable are set in the JPA object scope to be available outside
+		this.SHORT_BYTE_SIZE = 2;
+		this.INT_BYTE_SIZE = 4;
+		
 		this.MIN_BYTE = -Math.pow(2, 7) ;
 		this.MAX_BYTE = Math.pow(2, 7) - 1;
 		this.MIN_UBYTE = 0;
@@ -95,9 +98,40 @@
 			return !(value < this.MIN_BYTE || value > this.MAX_BYTE);
 		};
 		
+		this.isASCIIStringValid = function(value) {
+			for(var i=0; i < value.length; i++) {
+				if(!this.isASCIICharValid(value.substr(i, 1))) return false;
+			}
+			return true;
+		};
+		
+		this.isASCIICharValid = function(value) {
+			return value.length === 1 && value.charCodeAt(0) < 127;
+		};
+		
 		this.isUnsignedByteValid = function(value) {
 			return !(value < this.MIN_UBYTE || value > this.MAX_UBYTE);
-		}
+		};
+		
+		this.writeBool = function(value) {
+			this.writeByte(+(value === true));
+		};
+		
+		this.writeASCIIChar = function(value) {
+			this.writeByte(value.charCodeAt(0));
+		};
+		
+		this.writeASCIIString = function(value, length) {
+			
+			var maxLen = length ? Math.min(value.length, length) : value.length;
+			var i = 0;
+			for(i=0; i < maxLen; i++) {					
+				this.writeASCIIChar(value.substr(i, 1));
+			}
+			while(i++ < length) {
+				this.writeASCIIChar("\0");
+			}
+		};
 		
 		this.writeUnsignedInt = function(value) {
 			ba[this.position++] = (value >> 24) & 0xFF;			
@@ -129,15 +163,29 @@
 			this.writeUnsignedByte(value);
 		};
 		
+		this.readBool = function() {
+			return this.readByte() === 1;
+		};
+		
+		this.readASCIIChar = function() {
+			return String.fromCharCode(this.readByte());
+		};
+		
+		this.readASCIIString = function(length) {
+			var buff = "", char;
+			while((char = this.readASCIIChar()) !== "\0")
+				buff += char;
+			return buff;
+		};
+		
 		this.readUnsignedInt = function() {
 			var value = (ba[this.position++] << 24);
 			value |= (ba[this.position++] << 16);
 			value |= (ba[this.position++] << 8);
 			value |= ba[this.position++];
-			
-			value = Math.pow(2, 32) + value;
-			
-			return value == Math.pow(2, 32) ? 0 : value;
+
+
+			return value < 0 ? Math.pow(2, 32) + value : value;
 		};
 		
 		this.readInt = function() {

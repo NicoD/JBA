@@ -1,5 +1,24 @@
 var JBA_URL = "http://localhost/jba/";
 
+
+test( "ASCCI char valid", function() {
+	var jba = new JBA();
+	
+	ok(jba.isASCIICharValid("a"), "testing a");
+	ok(jba.isASCIICharValid("9"), "testing 9");	
+	ok(!jba.isASCIICharValid("é"), "testing é");
+	ok(!jba.isASCIICharValid("þ"), "testing þ");
+});
+
+test( "ASCCI string valid", function() {
+	var jba = new JBA();
+	
+	ok(jba.isASCIIStringValid("hello word"), "testing hello word");
+	ok(jba.isASCIIStringValid("foo" + "\0" + "bar"), "testing foo[null char]bar");	
+	ok(!jba.isASCIIStringValid("déjà"), "testing déjà");	
+	ok(!jba.isASCIIStringValid("Россия"), "testing Россия");
+});
+
 test( "unsigned byte overflow", function() {
 	var jba = new JBA();
 	
@@ -147,6 +166,90 @@ test( "test int length", function() {
 	ok(jba.size() === 4);
 });
 
+test( "test read bool", function() {
+	var jba, value;
+	
+	jba = new JBA();
+	jba.writeBool(false);
+	jba.position = 0;
+	value = jba.readBool();
+	ok(value === false, "writing / reading false");
+
+
+	jba = new JBA();
+	jba.writeBool(true);
+	jba.position = 0;
+	value = jba.readBool();
+	ok(value === true, "writing / reading true");
+	
+
+	jba = new JBA();
+	jba.writeBool("");
+	jba.position = 0;
+	value = jba.readBool();
+	ok(value === false, "writing / reading empty string");	
+	
+	jba = new JBA();
+	jba.writeBool("true");
+	jba.position = 0;
+	value = jba.readBool();
+	ok(value === false, "writing / reading string");		
+});
+
+
+test( "test read ASCII char", function() {
+	var jba, value;
+	
+	jba = new JBA();
+	jba.writeASCIIChar("a");
+	jba.position = 0;
+	value = jba.readASCIIChar();
+	ok(value === "a", "writing / reading a");
+
+
+	jba = new JBA();
+	jba.writeASCIIChar("\n");
+	jba.position = 0;
+	value = jba.readASCIIChar();
+	ok(value === "\n", "writing / reading \n");
+	
+	jba = new JBA();
+	jba.writeASCIIChar("\0");
+	jba.position = 0;
+	value = jba.readASCIIChar();
+	ok(value === "\0", "writing / reading \0");
+});
+
+
+test( "test read ASCII string", function() {
+	var jba, value;
+	
+	jba = new JBA();
+	jba.writeASCIIString("javascript");
+	jba.position = 0;
+	value = jba.readASCIIString();
+	ok(value === "javascript", "writing / reading javascript");
+
+	jba = new JBA();
+	jba.writeASCIIString("javascript", 200);
+	jba.position = 0;
+	value = jba.readASCIIString();
+	ok(value === "javascript", "writing / reading javascript with bigger buffer");
+
+	jba = new JBA();
+	jba.writeASCIIString("javascript", 4);
+	jba.position = 0;
+	value = jba.readASCIIString();
+	ok(value === "java", "writing / reading javascript with lower buffer");
+	
+	jba = new JBA();
+	jba.writeASCIIString("java" + "\0" + "script");
+	jba.position = 0;
+	value = jba.readASCIIString();
+	ok(value === "java", "writing / reading javascript with null char");	
+});
+
+
 test( "read unsigned byte", function() {
 	var jba, value;
 	
@@ -273,13 +376,13 @@ test( "read unsigned int", function() {
 	ok(value === 0, "writing / reading 0");		
 	
 	jba = new JBA();
-	jba.writeUnsignedInt(4294967295);
+	jba.writeUnsignedInt(3000000000);
 	jba.position = 0;
 	value = jba.readUnsignedInt();
-	ok(value === 4294967295, "writing / reading 4294967295");		
+	ok(value === 3000000000, "writing / reading 3000000000");		
 	
 	
-	jba = new JBA();
+	jba = new JBA();     
 	jba.writeUnsignedInt(4294967295);
 	jba.position = 0;
 	value = jba.readUnsignedInt();
