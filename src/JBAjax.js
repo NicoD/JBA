@@ -25,7 +25,10 @@
  * @see https://developer.mozilla.org/En/Using_XMLHttpRequest#Receiving_binary_data
  */
 var JBAjax = (function() {
+    "use strict";
 
+    function cbEmpty() {}
+    
 	function createRequest() {
 		var xhr = null;
 		if (window.ActiveXObject) {
@@ -41,15 +44,15 @@ var JBAjax = (function() {
 		var xhr = createRequest();
 		if (xhr) {
 			if (cbSuccess) {
-				if (typeof(xhr.onload) != "undefined") {
+				if (typeof(xhr.onload) !== "undefined") {
 					xhr.onload = function() {
-						(xhr.status == "200") ? cbSuccess(this) : (cbError||cbEmpty)();
+                        ((xhr.status === "200") ? cbSuccess : (cbError||cbEmpty))(this);
 						xhr = null;
 					};
 				} else {
 					xhr.onreadystatechange = function() {
-						if (xhr.readyState == 4) {
-							(xhr.status == "200") ? cbSuccess(this) : (cbError||cbEmpty)();
+						if (xhr.readyState === 4) {
+							((xhr.status === "200") ? cbSuccess : (cbError||cbEmpty))(this);
 							xhr = null;
 						}
 					};
@@ -63,20 +66,16 @@ var JBAjax = (function() {
 	}
 	
 
-	function cbEmpty() {};
 
 	function sendRequest(url, cbSuccess, cbError) {
 		var xhr = createRequest();
 		if (xhr) {
 
-			var iDataOffset = 0;
-			var iDataLen = 0;
-
 			if (cbSuccess) {
 
-				if (typeof(xhr.onload) != "undefined") {
+				if (typeof(xhr.onload) !== "undefined") {
 					xhr.onload = function() {
-						if (xhr.status == "200" || xhr.status == "206" || xhr.status == "0") {
+						if (xhr.status === 200 || xhr.status === 206 || xhr.status === 0) {
 							xhr.binaryResponse = xhr.responseText;
 							xhr.fileSize = xhr.getResponseHeader("Content-Length");
 							cbSuccess(xhr);
@@ -88,11 +87,11 @@ var JBAjax = (function() {
 
 				} else {
 					xhr.onreadystatechange = function() {
-						if (xhr.readyState == 4) {
-							if (xhr.status == "200" || xhr.status == "206" || xhr.status == "0") {
+						if (xhr.readyState === 4) {
+							if (xhr.status === 200 || xhr.status === 206 || xhr.status === 0) {
 								var oRes = {
 									status : xhr.status,
-									binaryResponse : (typeof xhr.responseBody == "unknown" ? xhr.responseBody : xhr.responseText, iDataOffset, iDataLen),
+									binaryResponse : (typeof xhr.responseBody === "unknown" ? xhr.responseBody : xhr.responseText),
 									fileSize : xhr.getResponseHeader("Content-Length")
 								};
 								cbSuccess(oRes);
@@ -115,5 +114,4 @@ var JBAjax = (function() {
 	return function(url, cbSuccess, cbError) {
 			sendRequest(url, cbSuccess, cbError);
 	};
-
 }());

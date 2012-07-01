@@ -25,12 +25,12 @@
  * byte array js class.
  * Allow to read write binary values in Big Endian byte order directly in an byte array
  * Supported types:
- * 	- unsigned bytes
- * 	- bytes
- * 	- unsigned short
- * 	- short
- * 	- unsigned int
- * 	- int
+ *  - unsigned bytes
+ *  - bytes
+ *  - unsigned short
+ *  - short
+ *  - unsigned int
+ *  - int
  *  - ascci char
  *  - ascci string
  *  - boolean
@@ -38,30 +38,35 @@
  * supports client side and server side (nodejs)
  */
 (function(exports) {
+	"use strict";
+	
+	/*jslint bitwise: true, plusplus: true*/
 	
 	var ByteArray = function(input) {
 		
-		var MIN_BYTE = -Math.pow(2, 7) ;
-		var MAX_BYTE = Math.pow(2, 7) - 1;
-		var MIN_UBYTE = 0;
-		var MAX_UBYTE = Math.pow(2, 8) - 1;
-		var MIN_SHORT = -Math.pow(2, 15);
-		var MAX_SHORT = Math.pow(2, 15) - 1;
-		var MIN_USHORT = 0;
-		var MAX_USHORT = Math.pow(2, 16) - 1;
-		var MIN_INT = -Math.pow(2, 31);
-		var MAX_INT = Math.pow(2, 31) - 1;
-		var MIN_UINT = 0;
-		var MAX_UINT = Math.pow(2, 32) - 1;
+		var MIN_BYTE, MAX_BYTE, MIN_UBYTE, MAX_UBYTE, MIN_SHORT, MAX_SHORT, MIN_USHORT, MAX_USHORT,
+		      MIN_INT, MAX_INT, MIN_UINT, MAX_UINT, ba = [];
+		
+		MIN_BYTE = -Math.pow(2, 7) ;
+		MAX_BYTE = Math.pow(2, 7) - 1;
+		MIN_UBYTE = 0;
+		MAX_UBYTE = Math.pow(2, 8) - 1;
+		MIN_SHORT = -Math.pow(2, 15);
+		MAX_SHORT = Math.pow(2, 15) - 1;
+		MIN_USHORT = 0;
+		MAX_USHORT = Math.pow(2, 16) - 1;
+		MIN_INT = -Math.pow(2, 31);
+		MAX_INT = Math.pow(2, 31) - 1;
+		MIN_UINT = 0;
+		MAX_UINT = Math.pow(2, 32) - 1;
 		
 		this.position = 0;
 		
-		var ba = new Array();
 		if(input) {
-			var toByteArray = function(str) { 
-				var ch, re = [], j=0;
-				for (var i = 0; i < str.length; i++ ) { 
-				    ch = str.charCodeAt(i);
+			ba = (function() { 
+				var ch, re = [], i=0, j=0;
+				for (i = 0; i < input.length; i++ ) { 
+				    ch = input.charCodeAt(i);
 				    re[j++] = ch & 0xFF;
 				    if(ch >= 127) {
 			            ch = ch >> 8;				        
@@ -69,8 +74,7 @@
 				}
 				// return an array of bytes
 				return re; 
-			};
-			ba = toByteArray(input);
+			}());
 		}
 		
 		this.isUnsignedIntValid = function(value) {
@@ -94,8 +98,9 @@
 		};
 		
 		this.isASCIIStringValid = function(value) {
-			for(var i=0; i < value.length; i++) {
-				if(!this.isASCIICharValid(value.substr(i, 1))) return false;
+		    var i=0;
+			for(i; i < value.length; i++) {
+				if(!this.isASCIICharValid(value.substr(i, 1))) { return false; }
 			}
 			return true;
 		};
@@ -118,13 +123,12 @@
 		
 		this.writeASCIIString = function(value, length) {
 			
-			var maxLen = length ? Math.min(value.length, length) : value.length;
-			var i = 0;
-			for(i=0; i < maxLen; i++) {					
+			var i = 0, maxLen = length ? Math.min(value.length, length) : value.length;
+			for(i; i < maxLen; i++) {					
 				this.writeASCIIChar(value.substr(i, 1));
 			}
 			while(i++ < length) {
-				this.writeASCIIChar("\0");
+				this.writeASCIIChar("\u0000");
 			}
 		};
 		
@@ -138,7 +142,7 @@
 		
 		this.writeInt = function(value) {
 			this.writeUnsignedInt(value);
-		},
+		};
 		
 		
 		this.writeUnsignedShort = function(value) {
@@ -168,11 +172,13 @@
 		
 		this.readASCIIString = function(length) {
 			var buff = "", char;
-			while((char = this.readASCIIChar()) !== "\0")
+			while((char = this.readASCIIChar()) !== "\u0000") {
 				buff += char;
+			}
 				
-			while(--length >  buff.length)
+			while(--length >  buff.length) {
 				++this.position;
+			}
 
 			return buff;
 		};
@@ -215,7 +221,7 @@
 		};
 		
 		this.toString = function() {
-			if(this.size() === 0) return null;
+			if(this.size() === 0) { return null; }
 
 			this.position = 0;
 			var buff = "";
@@ -224,11 +230,12 @@
 			} while(++this.position < ba.length);
 
 			return buff;
-		}
+		};
 	};
 	
 	exports.create = function(input) {
 		return new ByteArray(input);
 	};
 	
-})(typeof exports === 'undefined'? function() { this.JBA = {}; return this.JBA;}() : exports);
+// this line permit to use the nodejs module export or add the module to a new namespace
+}((function() { "use strict"; return (typeof exports === 'undefined') ? (function(){ window.JBA = {}; return window.JBA; }()) : exports; }())));
