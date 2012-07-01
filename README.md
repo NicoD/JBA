@@ -36,6 +36,7 @@ The basic test configuration runs with http://localhost/test/test.html
 ###TODO###
  
  * support a Little Endian
- * add writeChar / readChar (with UTF-8 / UTF-16 encoding)
- * replace the internal JBA buffer into a string instead of an array
+ * add string writing ASCII (*DONE*) / UTF-8 / UTF16
+ * add boolean support (*DONE*)
+ * replace the internal JBA buffer with something using less memory (string or 8bytes values array)
  * optimize the operations
