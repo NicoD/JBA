@@ -31,30 +31,28 @@
  * 	- short
  * 	- unsigned int
  * 	- int
+ *  - ascci char
+ *  - ascci string
+ *  - boolean
  * 
  * supports client side and server side (nodejs)
  */
 (function(exports) {
 	
-	exports.JBA = function(input) {
+	var ByteArray = function(input) {
 		
-		
-		// all the info variable are set in the JPA object scope to be available outside
-		this.SHORT_BYTE_SIZE = 2;
-		this.INT_BYTE_SIZE = 4;
-		
-		this.MIN_BYTE = -Math.pow(2, 7) ;
-		this.MAX_BYTE = Math.pow(2, 7) - 1;
-		this.MIN_UBYTE = 0;
-		this.MAX_UBYTE = Math.pow(2, 8) - 1;
-		this.MIN_SHORT = -Math.pow(2, 15);
-		this.MAX_SHORT = Math.pow(2, 15) - 1;
-		this.MIN_USHORT = 0;
-		this.MAX_USHORT = Math.pow(2, 16) - 1;
-		this.MIN_INT = -Math.pow(2, 31);
-		this.MAX_INT = Math.pow(2, 31) - 1;
-		this.MIN_UINT = 0;
-		this.MAX_UINT = Math.pow(2, 32) - 1;
+		var MIN_BYTE = -Math.pow(2, 7) ;
+		var MAX_BYTE = Math.pow(2, 7) - 1;
+		var MIN_UBYTE = 0;
+		var MAX_UBYTE = Math.pow(2, 8) - 1;
+		var MIN_SHORT = -Math.pow(2, 15);
+		var MAX_SHORT = Math.pow(2, 15) - 1;
+		var MIN_USHORT = 0;
+		var MAX_USHORT = Math.pow(2, 16) - 1;
+		var MIN_INT = -Math.pow(2, 31);
+		var MAX_INT = Math.pow(2, 31) - 1;
+		var MIN_UINT = 0;
+		var MAX_UINT = Math.pow(2, 32) - 1;
 		
 		this.position = 0;
 		
@@ -64,14 +62,11 @@
 				var ch, re = [], j=0;
 				for (var i = 0; i < str.length; i++ ) { 
 				    ch = str.charCodeAt(i);
-				    if(ch < 127) {
-				        re[j++] = ch & 0xFF;
+				    re[j++] = ch & 0xFF;
+				    if(ch >= 127) {
+			            ch = ch >> 8;				        
 				    }
-				    else {
-				    	re[j++] =  ch & 0xFF;
-			            ch = ch >> 8;
-				    }
-				}   
+				}
 				// return an array of bytes
 				return re; 
 			};
@@ -79,23 +74,23 @@
 		}
 		
 		this.isUnsignedIntValid = function(value) {
-			return !(value < this.MIN_UINT || value > this.MAX_UINT);
+			return !(value < MIN_UINT || value > MAX_UINT);
 		};
 		
 		this.isIntValid = function(value) {
-			return !(value < this.MIN_INT || value > this.MAX_INT);	
+			return !(value < MIN_INT || value > MAX_INT);	
 		};
 		
 		this.isShortValid = function(value) {
-			return !(value < this.MIN_SHORT || value > this.MAX_SHORT);
+			return !(value < MIN_SHORT || value > MAX_SHORT);
 		};
 		
 		this.isUnsignedShortValid = function(value) {
-			return !(value < this.MIN_USHORT || value > this.MAX_USHORT);
+			return !(value < MIN_USHORT || value > MAX_USHORT);
 		};
 		
 		this.isByteValid = function(value) {
-			return !(value < this.MIN_BYTE || value > this.MAX_BYTE);
+			return !(value < MIN_BYTE || value > MAX_BYTE);
 		};
 		
 		this.isASCIIStringValid = function(value) {
@@ -110,7 +105,7 @@
 		};
 		
 		this.isUnsignedByteValid = function(value) {
-			return !(value < this.MIN_UBYTE || value > this.MAX_UBYTE);
+			return !(value < MIN_UBYTE || value > MAX_UBYTE);
 		};
 		
 		this.writeBool = function(value) {
@@ -175,6 +170,10 @@
 			var buff = "", char;
 			while((char = this.readASCIIChar()) !== "\0")
 				buff += char;
+				
+			while(--length >  buff.length)
+				++this.position;
+
 			return buff;
 		};
 		
@@ -190,7 +189,7 @@
 		
 		this.readInt = function() {
 			var unsignedValue = this.readUnsignedInt();
-			return (unsignedValue > this.MAX_INT ? unsignedValue - Math.pow(2, 32) : unsignedValue);	
+			return (unsignedValue > MAX_INT ? unsignedValue - Math.pow(2, 32) : unsignedValue);	
 		};
 		
 		this.readUnsignedShort = function() {
@@ -199,7 +198,7 @@
 		
 		this.readShort = function() {
 			var unsignedValue = this.readUnsignedShort();
-			return (unsignedValue > this.MAX_SHORT ? unsignedValue - Math.pow(2, 16) : unsignedValue);			
+			return (unsignedValue > MAX_SHORT ? unsignedValue - Math.pow(2, 16) : unsignedValue);			
 		};
 		
 		this.readUnsignedByte = function() {			
@@ -208,12 +207,28 @@
 		
 		this.readByte = function() {
 			var unsignedValue = this.readUnsignedByte();
-			return (unsignedValue > this.MAX_BYTE ? unsignedValue - Math.pow(2, 8) : unsignedValue);
+			return (unsignedValue > MAX_BYTE ? unsignedValue - Math.pow(2, 8) : unsignedValue);
 		};
 		
 		this.size = function() {
 			return ba.length;
 		};
+		
+		this.toString = function() {
+			if(this.size() === 0) return null;
+
+			this.position = 0;
+			var buff = "";
+			do {
+				buff += String.fromCharCode(ba[this.position]);
+			} while(++this.position < ba.length);
+
+			return buff;
+		}
 	};
 	
-})(typeof exports === 'undefined'? this : exports);
+	exports.create = function(input) {
+		return new ByteArray(input);
+	};
+	
+})(typeof exports === 'undefined'? function() { this.JBA = {}; return this.JBA;}() : exports);
