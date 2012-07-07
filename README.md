@@ -36,7 +36,9 @@ The basic test configuration runs with http://localhost/test/test.html
 ###TODO###
  
  * support a Little Endian
- * add string writing ASCII (*DONE*) / UTF-8 / UTF16
- * add boolean support (*DONE*)
+ * add string writing ASCII (**DONE**) / UTF-8 / UTF16
+ * add boolean support (**DONE**)
+ * add ArrayBuffer implementation if available
  * replace the internal JBA buffer with something using less memory (string or 8bytes values array)
  * optimize the operations
+ * add compatibility with IE9 for JBAjax

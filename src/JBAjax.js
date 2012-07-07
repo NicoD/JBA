@@ -104,7 +104,8 @@ var JBAjax = (function() {
 				}
 			}
 			xhr.open("GET", url, true);
-			xhr.overrideMimeType('text/plain; charset=x-user-defined');
+			if(xhr.overrideMimeType)
+    			xhr.overrideMimeType('text/plain; charset=x-user-defined');
 			xhr.send(null);
 		} else {
 			(cbError||cbEmpty)();
