@@ -39,13 +39,76 @@
  */
 (function(exports) {
     "use strict";
-    
+
     /*jslint bitwise: true, plusplus: true*/
+
     
-    var ByteArray = function(input) {
+    var ByteStorage, ByteArray;
+    
+    ByteStorage = function(input) {
+        
+        var buf, MEM_SIZE = 1024;
+           
+        if(typeof ArrayBuffer === 'function') {
+            if (!ArrayBuffer.prototype.copyInto) {
+                ArrayBuffer.prototype.copyInto = function (target) {
+                    var i, that = new Uint8Array(this),
+                    resultArray = new Uint8Array(target);
+                    for (i = 0; i < resultArray.length; i++) {
+                       resultArray[i] = that[i];
+                    }
+                    return target;
+                };
+            }
+            
+            buf = new ArrayBuffer(input ? input.length*2 : MEM_SIZE); // 2 bytes for each char
+            this.ba = new Uint8Array(buf);              
+        } else {
+            this.ba = [];
+        }
+        
+        this.maxPosition = input ? input.length : 0;
+        this.position = 0;
+        
+        if(input) {
+            
+            (function(ba) { 
+                var ch, i=0, j=0;
+                for (i = 0; i < input.length; i++ ) { 
+                    ch = input.charCodeAt(i);
+                    ba[j++] = ch & 0xFF;
+                    if(ch >= 127) {
+                        ch = ch >> 8;                       
+                    }
+                }
+            }(this.ba));
+        }
+        
+        this.writeByte = function(b) {
+           this.ba[this.position++] = b & 0xFF;          
+            if(this.position > this.maxPosition) {
+                this.maxPosition = this.position;
+                if(typeof ArrayBuffer === 'function' && this.maxPosition >= this.ba.length) {
+                    buf = buf.copyInto(new ArrayBuffer(this.ba.length + MEM_SIZE));
+                    this.ba = new Uint8Array(buf);
+                }
+            }
+        };
+        
+        
+        this.readByte = function() {
+            return this.ba[this.position++];
+        };
+        
+        this.size = function() {
+            return this.maxPosition;
+        };
+    };
+    
+    ByteArray = function(input) {
         
         var MIN_BYTE, MAX_BYTE, MIN_UBYTE, MAX_UBYTE, MIN_SHORT, MAX_SHORT, MIN_USHORT, MAX_USHORT,
-            MIN_INT, MAX_INT, MIN_UINT, MAX_UINT, ba = [];
+            MIN_INT, MAX_INT, MIN_UINT, MAX_UINT, storage;
         
         MIN_BYTE = -Math.pow(2, 7) ;
         MAX_BYTE = Math.pow(2, 7) - 1;
@@ -60,23 +123,25 @@
         MIN_UINT = 0;
         MAX_UINT = Math.pow(2, 32) - 1;
         
-        this.position = 0;
+        storage = new ByteStorage(input);
         
-        if(input) {
-            ba = (function() { 
-                var ch, re = [], i=0, j=0;
-                for (i = 0; i < input.length; i++ ) { 
-                    ch = input.charCodeAt(i);
-                    re[j++] = ch & 0xFF;
-                    if(ch >= 127) {
-                        ch = ch >> 8;                       
-                    }
-                }
-                // return an array of bytes
-                return re; 
-            }());
-        }
         
+        this.reset = function() {
+            storage.position = 0;
+        };
+        
+        this.next = function() {
+            ++storage.position;
+        };
+        
+        this.previous = function() {
+            --storage.position;
+        };
+        
+        this.to = function(to) {
+            storage.position = to;
+        };
+         
         this.isUnsignedIntValid = function(value) {
             return !(value < MIN_UINT || value > MAX_UINT);
         };
@@ -137,10 +202,10 @@
         
                 
         this.writeUnsignedInt = function(value) {
-            ba[this.position++] = (value >> 24) & 0xFF;         
-            ba[this.position++] = (value >> 16) & 0xFF;
-            ba[this.position++] = (value >> 8) & 0xFF;
-            ba[this.position++] = value & 0xFF;         
+            storage.writeByte(value >> 24);
+            storage.writeByte(value >> 16);
+            storage.writeByte(value >> 8);            
+            storage.writeByte(value);
         };
 
         
@@ -150,8 +215,8 @@
         
         
         this.writeUnsignedShort = function(value) {
-            ba[this.position++] = (value >> 8) & 0xFF;
-            ba[this.position++] = value & 0xFF;         
+            storage.writeByte(value >> 8);
+            storage.writeByte(value);
         };
         
         this.writeShort = function(value) {
@@ -159,7 +224,7 @@
         };
         
         this.writeUnsignedByte = function(value) {
-            ba[this.position++] = value & 0xFF;
+            storage.writeByte(value);
         };
         
         this.writeByte = function(value) {
@@ -181,18 +246,17 @@
             }
                 
             while(--length >  buff.length) {
-                ++this.position;
+                ++storage.position;
             }
 
             return buff;
         };
         
         this.readUnsignedInt = function() {
-            var value = (ba[this.position++] << 24);
-            value |= (ba[this.position++] << 16);
-            value |= (ba[this.position++] << 8);
-            value |= ba[this.position++];
-
+            var value = storage.readByte() << 24;
+            value |= storage.readByte() << 16;
+            value |= storage.readByte() << 8;
+            value |= storage.readByte();
 
             return value < 0 ? Math.pow(2, 32) + value : value;
         };
@@ -203,7 +267,7 @@
         };
         
         this.readUnsignedShort = function() {
-            return (ba[this.position++] << 8 | ba[this.position++]);
+            return (storage.readByte() << 8 | storage.readByte());
         };
         
         this.readShort = function() {
@@ -211,8 +275,8 @@
             return (unsignedValue > MAX_SHORT ? unsignedValue - Math.pow(2, 16) : unsignedValue);           
         };
         
-        this.readUnsignedByte = function() {            
-            return ba[this.position++];
+        this.readUnsignedByte = function() {      
+            return storage.readByte();
         };
         
         this.readByte = function() {
@@ -221,22 +285,20 @@
         };
         
         this.size = function() {
-            return ba.length;
+            return storage.size();
         };
         
         this.toString = function() {
             if(this.size() === 0) { return null; }
 
-            this.position = 0;
+            storage.position = 0;
             var buff = "";
             do {
-                buff += String.fromCharCode(ba[this.position]);
-            } while(++this.position < ba.length);
+                buff += String.fromCharCode(storage.readByte());
+            } while(    storage.position < storage.size());
 
             return buff;
         };
-        
-        this.ba = ba;
     };
         
     exports.create = function(input) {

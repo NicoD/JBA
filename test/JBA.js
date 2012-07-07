@@ -104,15 +104,15 @@
     
     // byte => 1 byte length
     test( "test byte length", function() {
-    	var jba;
-    	
-    	jba = JBA.create();
-    	jba.writeByte(-128);	
-    	ok(jba.size() === 1);
+        var jba;
+        
+        jba = JBA.create();
+        jba.writeByte(-128);	
+        ok(jba.size() === 1);
     
-    	jba = JBA.create();
-    	jba.writeByte(127);
-    	ok(jba.size() === 1);
+        jba = JBA.create();
+        jba.writeByte(127);
+        ok(jba.size() === 1);
     });
     
     
@@ -176,27 +176,27 @@
         
         jba = JBA.create();
         jba.writeBool(false);
-        jba.position = 0;
+        jba.reset();
         value = jba.readBool();
         ok(value === false, "writing / reading false");
     
     
         jba = JBA.create();
         jba.writeBool(true);
-        jba.position = 0;
+        jba.reset();
         value = jba.readBool();
         ok(value === true, "writing / reading true");
         
     
         jba = JBA.create();
         jba.writeBool("");
-        jba.position = 0;
+        jba.reset();
         value = jba.readBool();
         ok(value === false, "writing / reading empty string");	
     
         jba = JBA.create();
         jba.writeBool("true");
-        jba.position = 0;
+        jba.reset();
         value = jba.readBool();
         ok(value === false, "writing / reading string");		
     });
@@ -207,20 +207,20 @@
         
         jba = JBA.create();
         jba.writeASCIIChar("a");
-        jba.position = 0;
+        jba.reset();
         value = jba.readASCIIChar();
         ok(value === "a", "writing / reading a");
     
     
         jba = JBA.create();
         jba.writeASCIIChar("\n");
-        jba.position = 0;
+        jba.reset();
         value = jba.readASCIIChar();
         ok(value === "\n", "writing / reading \n");
         
         jba = JBA.create();
         jba.writeASCIIChar("\0");
-        jba.position = 0;
+        jba.reset();
         value = jba.readASCIIChar();
         ok(value === "\0", "writing / reading \0");
     });
@@ -231,48 +231,48 @@
     
         jba = JBA.create();
         jba.writeASCIIString("javascript");
-        jba.position = 0;
+        jba.reset();
         value = jba.readASCIIString();
         ok(value === "javascript", "writing / reading javascript");
     
         jba = JBA.create();
         jba.writeASCIIString("javascript", 200);
-        jba.position = 0;
+        jba.reset();
         value = jba.readASCIIString();
         ok(value === "javascript", "writing / reading javascript with bigger buffer");
    
         jba = JBA.create();
         jba.writeASCIIString("javascript", 4);
-        jba.position = 0;
+        jba.reset();
         value = jba.readASCIIString();
         ok(value === "java", "writing / reading javascript with lower buffer");
         
         jba = JBA.create();
         jba.writeASCIIString("java" + "\0" + "script");
-        jba.position = 0;
+        jba.reset();
         value = jba.readASCIIString();
         ok(value === "java", "writing / reading javascript with null char");	
     });
     
     
-    test( "read unsigned byte", function() {
+   test( "read unsigned byte", function() {
         var jba, value;
         
         jba = JBA.create();
         jba.writeUnsignedByte(0);
-        jba.position = 0;
+        jba.reset();
         value = jba.readUnsignedByte();
         ok(value === 0, "writing / reading 0");
         
         jba = JBA.create();
         jba.writeUnsignedByte(255);
-        jba.position = 0;
+        jba.reset();
         value = jba.readUnsignedByte();
         ok(value === 255, "writing / reading 255");
         
         jba = JBA.create();
         jba.writeUnsignedByte(121);
-        jba.position = 0;
+        jba.reset();
         value = jba.readUnsignedByte();
         ok(value === 121, "writing / reading 121");	
     });
@@ -282,32 +282,32 @@
         
         jba = JBA.create();
         jba.writeByte(0);
-        jba.position = 0;
+        jba.reset();
         value = jba.readByte();
         ok(value === 0, "writing / reading 0");
         
         jba = JBA.create();
         jba.writeByte(-128);
-        jba.position = 0;
+        jba.reset();
         value = jba.readByte();
         ok(value === -128, "writing / reading -128");
     
         jba = JBA.create();
         jba.writeByte(127);
-        jba.position = 0;
+        jba.reset();
         value = jba.readByte();
         ok(value === 127, "writing / reading 127");
         
         
         jba = JBA.create();
         jba.writeByte(118);
-        jba.position = 0;
+        jba.reset();
         value = jba.readByte();
         ok(value === 118, "writing / reading 118");	
         
-        jba.position = 0;
+        jba.reset();
         jba.writeByte(-103);
-        jba.position = 0;
+        jba.reset();
         value = jba.readByte();	
         ok(value === -103, "writing / ready -103");
         
@@ -318,19 +318,19 @@
         
         jba = JBA.create();
         jba.writeUnsignedShort(0);
-        jba.position = 0;
+        jba.reset();
         value = jba.readUnsignedShort();
         ok(value === 0, "writing / reading 0");		
         
         jba = JBA.create();
         jba.writeUnsignedShort(65535);
-        jba.position = 0;
+        jba.reset();
         value = jba.readUnsignedShort();
         ok(value === 65535, "writing / reading 65535");		
         
         jba = JBA.create();
         jba.writeUnsignedShort(43212);
-        jba.position = 0;
+        jba.reset();
         value = jba.readUnsignedShort();
         ok(value === 43212, "writing / reading 43212");	
     });
@@ -341,31 +341,31 @@
         
         jba = JBA.create();
         jba.writeShort(0);
-        jba.position = 0;
+        jba.reset();
         value = jba.readShort();
         ok(value === 0, "writing / reading 0");		
    
         jba = JBA.create();
         jba.writeShort(-32768);
-        jba.position = 0;
+        jba.reset();
         value = jba.readShort();
         ok(value === -32768, "writing / reading -32768");		
         
         jba = JBA.create();
         jba.writeShort(32767);
-        jba.position = 0;
+        jba.reset();
         value = jba.readShort();
         ok(value === 32767, "writing / reading 32767");		
         
         jba = JBA.create();
         jba.writeShort(14212);
-        jba.position = 0;
+        jba.reset();
         value = jba.readShort();	
         ok(value === 14212, "writing / reading 14212");	
     
         jba = JBA.create();
         jba.writeShort(-12272);
-        jba.position = 0;
+        jba.reset();
         value = jba.readShort();	
         ok(value === -12272, "writing / reading -12272");		
     });
@@ -376,20 +376,20 @@
         
         jba = JBA.create();
         jba.writeUnsignedInt(0);
-        jba.position = 0;
+        jba.reset();
         value = jba.readUnsignedInt();
         ok(value === 0, "writing / reading 0");		
         
         jba = JBA.create();
         jba.writeUnsignedInt(3000000000);
-        jba.position = 0;
+        jba.reset();
         value = jba.readUnsignedInt();
         ok(value === 3000000000, "writing / reading 3000000000");		
         
         
         jba = JBA.create();     
         jba.writeUnsignedInt(4294967295);
-        jba.position = 0;
+        jba.reset();
         value = jba.readUnsignedInt();
         ok(value === 4294967295, "writing / reading 374239372");		
     });
@@ -400,32 +400,32 @@
         
         jba = JBA.create();
         jba.writeInt(0);
-        jba.position = 0;
+        jba.reset();
         value = jba.readInt();
         ok(value === 0, "writing / reading 0");		
         
         jba = JBA.create();
         jba.writeInt(-2147483648);
-        jba.position = 0;
+        jba.reset();
         value = jba.readInt();
         ok(value === -2147483648, "writing / reading -2147483648");		
         
         jba = JBA.create();
         jba.writeInt(2147483647);
-        jba.position = 0;
+        jba.reset();
         value = jba.readInt();
         ok(value === 2147483647, "writing / reading 2147483647");		
         
         
         jba = JBA.create();
         jba.writeInt(1231231231);
-        jba.position = 0;
+        jba.reset();
         value = jba.readInt();
         ok(value === 1231231231, "writing / reading 1231231231");			
         
         jba = JBA.create();
         jba.writeInt(-1894561237);
-        jba.position = 0;
+        jba.reset();
         value = jba.readInt();
         ok(value === -1894561237, "writing / reading -1894561237");				
     });
