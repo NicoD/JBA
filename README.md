@@ -5,7 +5,7 @@ JBA (Javascript ByteArray)
 
 ###Features###
 
- * support of reading / writing: bytes, ubytes, short, ushort, int, uint
+ * support of reading / writing: bytes, ubytes, short, ushort, int, uint, ascii char, bytes array
  * load binary input
  * Big Endian byte order support
  * client side ans server side (nodejs) support
@@ -57,7 +57,8 @@ The basic test configuration runs with http://localhost/test/test.html
  * add build mechanism (**DONE**)
  * handle xhr2 arraybuffer (**DONE**)
  * handle JBA input as ArrayBuffer (**DONE**)
-
+ * add read/write bytes methods (**DONE**)
+ 
  * add  UTF-8 / UTF16 writing methods
  * support Little Endian byte order
  * optimize operations

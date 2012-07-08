@@ -25,8 +25,8 @@
  * byte array js class.
  * Allow to read write binary values in Big Endian byte order directly in an byte array
  * Supported types:
- *  - unsigned bytes
- *  - bytes
+ *  - unsigned byte
+ *  - byte
  *  - unsigned short
  *  - short
  *  - unsigned int
@@ -34,8 +34,9 @@
  *  - ascci char
  *  - ascci string
  *  - boolean
+ *  - bytes
  * 
- * supports client side and server side (nodejs)
+ * compatible CommonJs
  */
 (function(exports) {
     "use strict";
@@ -104,6 +105,21 @@
         this.readByte = function() {
             return this.ba[this.position++];
         };
+        
+        
+        this.readBytes = function(length) {
+            var i, bytes;
+            if(typeof ArrayBuffer === 'function') {
+                bytes = new Uint8Array(new ArrayBuffer(length));
+            } else {
+                bytes = [];
+            }
+            for(i=0; i<length; i++) {
+                bytes[i] = this.readByte();
+            }
+            return bytes;
+        };
+        
         
         this.size = function() {
             return this.maxPosition;
@@ -186,6 +202,13 @@
         
         this.isUnsignedByteValid = function(value) {
             return !(value < MIN_UBYTE || value > MAX_UBYTE);
+        };
+        
+        this.writeBytes = function(bytes) {
+            var i;
+            for(i=0; i < bytes.length; i++) {
+                this.writeByte(bytes[i]);
+            }
         };
         
         this.writeBool = function(value) {
@@ -287,6 +310,10 @@
         
         this.readUnsignedByte = function() {      
             return storage.readByte();
+        };
+        
+        this.readBytes = function(length) {
+            return storage.readBytes(length);
         };
         
         this.readByte = function() {

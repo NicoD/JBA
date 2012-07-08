@@ -431,6 +431,35 @@
     });
     
     
+    test( "read bytes", function() {
+        var jba, value, ba;
+        
+        ba = new Uint8Array(new ArrayBuffer(4));
+        ba[0] = 5;
+        ba[1] = 110;
+        ba[2] = 124;
+        ba[3] = 149;
+        
+        
+        jba = JBA.create();
+        jba.writeBytes(ba);
+        ba = null;
+        jba.reset();
+        
+        ok(jba.readUnsignedByte() === 5, "writing / reading 5");             
+        ok(jba.readUnsignedByte() === 110, "writing / reading 110");                     
+        ok(jba.readUnsignedByte() === 124, "writing / reading 124");                             
+        ok(jba.readUnsignedByte() === 149, "writing / reading 149");                     
+        
+        jba.reset();
+        ba = jba.readBytes(4);
+        ok(ba[0] === 5, "writing / reading 5");             
+        ok(ba[1] === 110, "writing / reading 110");                     
+        ok(ba[2] === 124, "writing / reading 124");                             
+        ok(ba[3] === 149, "writing / reading 149");
+    });
+    
+        
     test("export as string" , function() {
         var jbaOut, jbaIn, value, output;
         
