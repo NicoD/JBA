@@ -1,0 +1,16 @@
+<project name="MyProject" default="build" basedir=".">
+
+		<taskdef name="jscomp" classname="com.google.javascript.jscomp.ant.CompileTask"
+			classpath="/opt/closure-compiler\compiler.jar"/>	
+		
+		<target name="build">
+
+			<jscomp compilationLevel="simple" warning="quiet" 
+				debug="false" output="bin/JBA.js">
+				<sources dir="src">
+					<file name="JBA.js"/>
+					<file name="JBAjax.js"/>
+				</sources>
+			</jscomp>
+		</target>
+</project>

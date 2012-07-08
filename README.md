@@ -18,12 +18,19 @@ The bytes are stored in ArrayBuffer if they are available, otherwise, they are s
 Also, the code has not be yet optimize.
 
 
-##Compatiblity##
-Chrome 20.0 and >
-Firefox 13.0.1 and >
-Should be compatible with previous version of this browsers (not tested)
+##Project build###
+The project build use google closure compiler to minify/optimize the src into the bin directory.
+There is a build.xml.example file to contains the closure compiler configuration
 
-JBAjax not Compatible with IE
+###Compatiblity###
+
+ * Chrome 20.0 and >
+ * Firefox 13.0.1 and >
+ * Should be compatible with previous version of this browsers (not tested)
+
+@see https://developer.mozilla.org/en/JavaScript_typed_arrays#Compatibility for ArrayBuffer compatibility
+
+ * JBAjax not Compatible with IE
 
 ###Tests###
 
@@ -50,3 +57,4 @@ The basic test configuration runs with http://localhost/test/test.html
  * support Little Endian 
  * optimize the operations
  * add compatibility with IE9 for JBAjax
+ * add build mechanism (**DONE**)

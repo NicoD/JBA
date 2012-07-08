@@ -47,7 +47,7 @@
     
     ByteStorage = function(input) {
         
-        var buf, MEM_SIZE = 1024;
+        var buf, MEM_SIZE = 1024; 
            
         if(typeof ArrayBuffer === 'function') {
             if (!ArrayBuffer.prototype.copyInto) {
@@ -240,9 +240,9 @@
         };
         
         this.readASCIIString = function(length) {
-            var buff = "", char;
-            while((char = this.readASCIIChar()) !== "\u0000") {
-                buff += char;
+            var buff = "", c;
+            while((c = this.readASCIIChar()) !== "\u0000") {
+                buff += c;
             }
                 
             while(--length >  buff.length) {
