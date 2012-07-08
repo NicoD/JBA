@@ -45,6 +45,8 @@
     
     var ByteStorage, ByteArray;
     
+    
+    // input can be binary string or ArrayBuffer
     ByteStorage = function(input) {
         
         var buf, MEM_SIZE = 1024; 
@@ -60,8 +62,12 @@
                     return target;
                 };
             }
-            
-            buf = new ArrayBuffer(input ? input.length*2 : MEM_SIZE); // 2 bytes for each char
+
+            if(input instanceof ArrayBuffer) {
+                buf = input;   
+            } else {
+                buf = new ArrayBuffer(input ? input.length*2 : MEM_SIZE); // 2 bytes for each char
+            }
             this.ba = new Uint8Array(buf);              
         } else {
             this.ba = [];
@@ -70,8 +76,7 @@
         this.maxPosition = input ? input.length : 0;
         this.position = 0;
         
-        if(input) {
-            
+        if(typeof input === "string") {
             (function(ba) { 
                 var ch, i=0, j=0;
                 for (i = 0; i < input.length; i++ ) { 
@@ -103,6 +108,7 @@
         this.size = function() {
             return this.maxPosition;
         };
+        
     };
     
     ByteArray = function(input) {
@@ -290,14 +296,27 @@
         
         this.toString = function() {
             if(this.size() === 0) { return null; }
-
             storage.position = 0;
-            var buff = "";
+            var buf = "";
             do {
-                buff += String.fromCharCode(storage.readByte());
+                buf += String.fromCharCode(storage.readByte());
             } while(    storage.position < storage.size());
 
-            return buff;
+            return buf;
+        };
+        
+        this.toArrayBuffer = function() {
+            if(typeof ArrayBuffer !== 'function') {
+                throw new Error("Array Buffer not compatible in the browser")
+            }
+            var buf = new ArrayBuffer(this.size()),
+                ba = new Uint8Array(buf);
+            storage.position = 0;
+            do {
+                ba[storage.position] = storage.readByte();
+            } while(storage.position < storage.size());
+
+            return buf;
         };
     };
         

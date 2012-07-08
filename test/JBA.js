@@ -431,7 +431,7 @@
     });
     
     
-    test("export" , function() {
+    test("export as string" , function() {
         var jbaOut, jbaIn, value, output;
         
         jbaOut = JBA.create();
@@ -482,6 +482,59 @@
         ok(jbaIn.readBool() === true);			
     });
     
+    
+    test("export as array buffer" , function() {
+        var jbaOut, jbaIn, value, output;
+        
+        jbaOut = JBA.create();
+        jbaOut.writeByte(-32);
+        jbaOut.writeByte(0);
+        jbaOut.writeByte(-100); 
+        jbaOut.writeByte(-110); 
+        jbaOut.writeByte(115);  
+        jbaOut.writeByte(10);
+        jbaOut.writeShort(-32768);
+        jbaOut.writeShort(0);           
+        jbaOut.writeShort(32767);                       
+        jbaOut.writeInt(-2147483648);
+        jbaOut.writeInt(0);         
+        jbaOut.writeInt(2147483647);            
+        jbaOut.writeUnsignedInt(0);
+        jbaOut.writeUnsignedInt(8);        
+        jbaOut.writeUnsignedInt(3000000000);            
+        jbaOut.writeUnsignedInt(4294967295);                        
+        jbaOut.writeASCIIChar("z");         
+        jbaOut.writeASCIIString("hello", 10);           
+        jbaOut.writeBool(false);
+        jbaOut.writeBool(true);
+        
+        output = jbaOut.toArrayBuffer();
+        console.log(new Uint8Array(output).length);
+        ok(new Uint8Array(output).length === 53);
+    
+        jbaIn = JBA.create(output);
+        ok(jbaIn.readByte() === -32);
+        ok(jbaIn.readByte() === 0); 
+        ok(jbaIn.readByte() === -100);      
+        ok(jbaIn.readByte() === -110);          
+        ok(jbaIn.readByte() === 115);   
+        ok(jbaIn.readByte() === 10);
+        ok(jbaIn.readShort() === -32768);
+        ok(jbaIn.readShort() === 0);    
+        ok(jbaIn.readShort() === 32767);
+        ok(jbaIn.readInt() === -2147483648);                                
+        ok(jbaIn.readInt() === 0);
+        ok(jbaIn.readInt() === 2147483647);                             
+        ok(jbaIn.readUnsignedInt() === 0);
+        ok(jbaIn.readUnsignedInt() === 8);        
+        ok(jbaIn.readUnsignedInt() === 3000000000);
+        ok(jbaIn.readUnsignedInt() === 4294967295);
+        ok(jbaIn.readASCIIChar() === "z");
+        ok(jbaIn.readASCIIString(10) === "hello");  
+        ok(jbaIn.readBool() === false);     
+        ok(jbaIn.readBool() === true);          
+    });
+        
     // see TestEncoder.java
     asyncTest( "read javaFile", function() {
         JBAjax(JBA_URL+"test/bjava.dat", 

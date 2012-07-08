@@ -27,9 +27,12 @@
 var JBAjax = (function() {
     "use strict";
 
-    function cbEmpty() {}
+
+    var cbEmpty, createRequest, sendRequest;
+
+    cbEmpty = function() {};
     
-	function createRequest() {
+	createRequest = function() {
 		var xhr = null;
 		if (window.ActiveXObject) {
 			xhr = new ActiveXObject("Microsoft.XMLHTTP");
@@ -37,80 +40,31 @@ var JBAjax = (function() {
 			xhr = new XMLHttpRequest();
 		}
 		return xhr;
-	}
+	};
 
-	function getHead(url, cbSuccess, cbError) {
+
+	sendRequest = function(url, cbSuccess, cbError) {
 
 		var xhr = createRequest();
-		if (xhr) {
-			if (cbSuccess) {
-				if (typeof(xhr.onload) !== "undefined") {
-					xhr.onload = function() {
-                        ((xhr.status === "200") ? cbSuccess : (cbError||cbEmpty))(this);
-						xhr = null;
-					};
-				} else {
-					xhr.onreadystatechange = function() {
-						if (xhr.readyState === 4) {
-							((xhr.status === "200") ? cbSuccess : (cbError||cbEmpty))(this);
-							xhr = null;
-						}
-					};
-				}
+        xhr.open("GET", url, true);
+        if(xhr.responseType !== undefined) {
+            xhr.responseType = 'arraybuffer';
+        }
+        if(xhr.overrideMimeType) {
+            xhr.overrideMimeType('text/plain; charset=x-user-defined');
+        }
+        
+		xhr.onload = function() {
+			if (xhr.status === 200 || xhr.status === 206 || xhr.status === 0) {
+				xhr.binaryResponse = (xhr.responseType !== undefined) ? this.response : xhr.responseText;
+				cbSuccess(xhr);
+			} else {
+				(cbError||cbEmpty)();
 			}
-			xhr.open("HEAD", url, true);
-			xhr.send(null);
-		} else {
-			(cbError||cbEmpty)();
-		}
-	}
-	
-
-
-	function sendRequest(url, cbSuccess, cbError) {
-		var xhr = createRequest();
-		if (xhr) {
-
-			if (cbSuccess) {
-
-				if (typeof(xhr.onload) !== "undefined") {
-					xhr.onload = function() {
-						if (xhr.status === 200 || xhr.status === 206 || xhr.status === 0) {
-							xhr.binaryResponse = xhr.responseText;
-							xhr.fileSize = xhr.getResponseHeader("Content-Length");
-							cbSuccess(xhr);
-						} else {
-							(cbError||cbEmpty)();
-						}
-						xhr = null;
-					};
-
-				} else {
-					xhr.onreadystatechange = function() {
-						if (xhr.readyState === 4) {
-							if (xhr.status === 200 || xhr.status === 206 || xhr.status === 0) {
-								var oRes = {
-									status : xhr.status,
-									binaryResponse : (typeof xhr.responseBody === "unknown" ? xhr.responseBody : xhr.responseText),
-									fileSize : xhr.getResponseHeader("Content-Length")
-								};
-								cbSuccess(oRes);
-							} else {
-								(cbError||cbEmpty)();
-							}
-							xhr = null;
-						}
-					};
-				}
-			}
-			xhr.open("GET", url, true);
-			if(xhr.overrideMimeType)
-    			xhr.overrideMimeType('text/plain; charset=x-user-defined');
-			xhr.send(null);
-		} else {
-			(cbError||cbEmpty)();
-		}
-	}
+			xhr = null;
+		};
+		xhr.send();
+	};
 
 	return function(url, cbSuccess, cbError) {
 			sendRequest(url, cbSuccess, cbError);

@@ -51,10 +51,14 @@ The basic test configuration runs with http://localhost/test/test.html
 
 ###TODO###
  
- * add string writing ASCII (**DONE**) / UTF-8 / UTF16
+ * add string writing ASCII (**DONE**)
  * add boolean support (**DONE**)
  * add ArrayBuffer implementation if available (**DONE**)
- * support Little Endian 
- * optimize the operations
- * add compatibility with IE9 for JBAjax
  * add build mechanism (**DONE**)
+ * handle xhr2 arraybuffer (**DONE**)
+ * handle JBA input as ArrayBuffer (**DONE**)
+
+ * add  UTF-8 / UTF16 writing methods
+ * support Little Endian byte order
+ * optimize operations
+ * compatibility with IE (JBAjax)
