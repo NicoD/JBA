@@ -43,15 +43,20 @@
 
     /*jslint bitwise: true, plusplus: true*/
 
+    var BIG_ENDIAN = 0,
+        LITTLE_ENDIAN = 1,
+        
+        ByteStorage, ByteArray;
     
-    var ByteStorage, ByteArray;
     
-    
-    // input can be binary string or ArrayBuffer
+    // input (string | ArrayBuffer)
+    // byteOrder (BIG_ENDIAN, LITTLE_ENDIAN)
     ByteStorage = function(input) {
         
         var buf, MEM_SIZE = 1024; 
-           
+
+        this.maxPosition = 0;
+        
         if(typeof ArrayBuffer === 'function') {
             if (!ArrayBuffer.prototype.copyInto) {
                 ArrayBuffer.prototype.copyInto = function (target) {
@@ -63,21 +68,28 @@
                     return target;
                 };
             }
+            
 
-            if(input instanceof ArrayBuffer) {
+            if(input === undefined) {
+                buf = new ArrayBuffer(MEM_SIZE);
+            } else if(input instanceof ArrayBuffer) {
                 buf = input;   
+                this.maxPosition = buf.byteLength;            
+            } else if(typeof input === "string") {
+                buf = new ArrayBuffer(input.length);
             } else {
-                buf = new ArrayBuffer(input ? input.length*2 : MEM_SIZE); // 2 bytes for each char
+                throw new Error("unsupported input " + typeof(input));
             }
-            this.ba = new Uint8Array(buf);              
+            this.ba = new Uint8Array(buf);  
         } else {
             this.ba = [];
         }
         
-        this.maxPosition = input ? input.length : 0;
         this.position = 0;
         
+        
         if(typeof input === "string") {
+            this.maxPosition = input.length;
             (function(ba) { 
                 var ch, i=0, j=0;
                 for (i = 0; i < input.length; i++ ) { 
@@ -127,7 +139,7 @@
         
     };
     
-    ByteArray = function(input) {
+    ByteArray = function(input, byteOrder) {
         
         var MIN_BYTE, MAX_BYTE, MIN_UBYTE, MAX_UBYTE, MIN_SHORT, MAX_SHORT, MIN_USHORT, MAX_USHORT,
             MIN_INT, MAX_INT, MIN_UINT, MAX_UINT, storage;
@@ -146,6 +158,8 @@
         MAX_UINT = Math.pow(2, 32) - 1;
         
         storage = new ByteStorage(input);
+        
+        this.byteOrder = byteOrder !== undefined ? byteOrder : BIG_ENDIAN;
         
         
         this.reset = function() {
@@ -235,10 +249,21 @@
         
                 
         this.writeUnsignedInt = function(value) {
-            storage.writeByte(value >> 24);
-            storage.writeByte(value >> 16);
-            storage.writeByte(value >> 8);            
-            storage.writeByte(value);
+            switch(this.byteOrder) {
+                case BIG_ENDIAN:
+                    storage.writeByte(value >> 24);
+                    storage.writeByte(value >> 16);
+                    storage.writeByte(value >> 8);            
+                    storage.writeByte(value);
+                break;
+                
+                case LITTLE_ENDIAN:
+                    storage.writeByte(value);
+                    storage.writeByte(value >> 8);
+                    storage.writeByte(value >> 16);
+                    storage.writeByte(value >> 24);
+                break;                
+            }
         };
 
         
@@ -248,8 +273,17 @@
         
         
         this.writeUnsignedShort = function(value) {
-            storage.writeByte(value >> 8);
-            storage.writeByte(value);
+            switch(this.byteOrder) {
+                case BIG_ENDIAN:
+                    storage.writeByte(value >> 8);
+                    storage.writeByte(value);
+                break;
+                
+                case LITTLE_ENDIAN:
+                    storage.writeByte(value);
+                    storage.writeByte(value >> 8);
+                break;
+            }                    
         };
         
         this.writeShort = function(value) {
@@ -286,11 +320,22 @@
         };
         
         this.readUnsignedInt = function() {
-            var value = storage.readByte() << 24;
-            value |= storage.readByte() << 16;
-            value |= storage.readByte() << 8;
-            value |= storage.readByte();
-
+            var value;
+            switch(this.byteOrder) {
+                case BIG_ENDIAN:
+                    value = storage.readByte() << 24;
+                    value |= storage.readByte() << 16;
+                    value |= storage.readByte() << 8;
+                    value |= storage.readByte();
+                break;
+                
+                case LITTLE_ENDIAN:
+                    value = storage.readByte();
+                    value |= storage.readByte() << 8;
+                    value |= storage.readByte() << 16;
+                    value |= storage.readByte() << 24;
+                break;
+            }
             return value < 0 ? Math.pow(2, 32) + value : value;
         };
         
@@ -300,7 +345,13 @@
         };
         
         this.readUnsignedShort = function() {
-            return (storage.readByte() << 8 | storage.readByte());
+            switch(this.byteOrder) {
+                case BIG_ENDIAN:
+                    return (storage.readByte() << 8 | storage.readByte());
+                
+                case LITTLE_ENDIAN:
+                    return (storage.readByte() | storage.readByte() << 8);
+            }
         };
         
         this.readShort = function() {
@@ -351,9 +402,26 @@
         };
     };
         
-    exports.create = function(input) {
-        return new ByteArray(input);
+    // arguments can be
+    //  - input (string | ArrayBuffer)
+    //  - byteOrder (BIG_ENDIAN, LITTLE_ENDIAN)
+    //  - input, byteOrder
+    exports.create = function(arg1, arg2) {
+        var input, byteOrder;
+        if(arg1 && !arg2) {
+            if(arg1 === BIG_ENDIAN || arg1 === LITTLE_ENDIAN) {
+                byteOrder = arg1;
+            } else {
+                input = arg1;
+            }
+        } else if(arg1 && arg2) {
+            input = arg1;
+            byteOrder = arg2;
+        }
+        return new ByteArray(input, byteOrder);
     };
+    exports.BIG_ENDIAN = BIG_ENDIAN;
+    exports.LITTLE_ENDIAN = LITTLE_ENDIAN;
     
     exports.INT_BYTE_SIZE = 4;
     exports.SHORT_BYTE_SIZE = 2; 

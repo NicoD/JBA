@@ -6,6 +6,22 @@
     var JBA_URL = "http://localhost/jba/";
     
     
+    test( "instanciation tests", function() {
+        var jba;
+        raises(function() { JBA.create(123); }, "int input");    
+        jba = JBA.create('abc'); 
+        ok(jba.size() === 3 && jba.byteOrder === JBA.BIG_ENDIAN, "string input / big endian");    
+        jba = JBA.create(new ArrayBuffer(3)); 
+        ok(jba.size() === 3 && jba.byteOrder === JBA.BIG_ENDIAN, "string ArrayBuffer / big endian");            
+        jba = JBA.create('abc', JBA.LITTLE_ENDIAN); 
+        ok(jba.size() === 3 && jba.byteOrder === JBA.LITTLE_ENDIAN, "string input / little endian");            
+        jba = JBA.create(JBA.LITTLE_ENDIAN); 
+        ok(jba.size() === 0 && jba.byteOrder === JBA.LITTLE_ENDIAN, "no input / little endian");                   
+        jba = JBA.create(); 
+        ok(jba.size() === 0 && jba.byteOrder === JBA.BIG_ENDIAN, "no input / big endian");                             
+    });
+    
+    
     test( "ASCCI char valid", function() {
         var jba = JBA.create();
 

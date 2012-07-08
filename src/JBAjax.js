@@ -22,6 +22,7 @@
 
 /**
  * just an helper that perform ajax call to retrieve binary data
+ * response is contained into the object binaryResponse. Its format is ArrayBuffer if supported, otherwise, a binary readable string
  * @see https://developer.mozilla.org/En/Using_XMLHttpRequest#Receiving_binary_data
  */
 var JBAjax = (function() {
