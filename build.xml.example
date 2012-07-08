@@ -1,7 +1,7 @@
 <project name="MyProject" default="build" basedir=".">
 
 		<taskdef name="jscomp" classname="com.google.javascript.jscomp.ant.CompileTask"
-			classpath="/opt/closure-compiler\compiler.jar"/>	
+			classpath="/opt/closure-compiler/compiler.jar"/>	
 		
 		<target name="build">
 

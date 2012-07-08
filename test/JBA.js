@@ -509,7 +509,6 @@
         jbaOut.writeBool(true);
         
         output = jbaOut.toArrayBuffer();
-        console.log(new Uint8Array(output).length);
         ok(new Uint8Array(output).length === 53);
     
         jbaIn = JBA.create(output);

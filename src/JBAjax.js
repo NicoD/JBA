@@ -32,20 +32,20 @@ var JBAjax = (function() {
 
     cbEmpty = function() {};
     
-	createRequest = function() {
-		var xhr = null;
-		if (window.ActiveXObject) {
-			xhr = new ActiveXObject("Microsoft.XMLHTTP");
-		} else if (window.XMLHttpRequest) {
-			xhr = new XMLHttpRequest();
-		}
-		return xhr;
-	};
+    createRequest = function() {
+        var xhr = null;
+        if (window.ActiveXObject) {
+            xhr = new ActiveXObject("Microsoft.XMLHTTP");
+        } else if (window.XMLHttpRequest) {
+            xhr = new XMLHttpRequest();
+        }
+        return xhr;
+    };
 
 
-	sendRequest = function(url, cbSuccess, cbError) {
+    sendRequest = function(url, cbSuccess, cbError) {
 
-		var xhr = createRequest();
+    var xhr = createRequest();
         xhr.open("GET", url, true);
         if(xhr.responseType !== undefined) {
             xhr.responseType = 'arraybuffer';
@@ -54,19 +54,19 @@ var JBAjax = (function() {
             xhr.overrideMimeType('text/plain; charset=x-user-defined');
         }
         
-		xhr.onload = function() {
-			if (xhr.status === 200 || xhr.status === 206 || xhr.status === 0) {
-				xhr.binaryResponse = (xhr.responseType !== undefined) ? this.response : xhr.responseText;
-				cbSuccess(xhr);
-			} else {
-				(cbError||cbEmpty)();
-			}
-			xhr = null;
-		};
-		xhr.send();
-	};
+        xhr.onload = function() {
+            if (xhr.status === 200 || xhr.status === 206 || xhr.status === 0) {
+                xhr.binaryResponse = (xhr.responseType !== undefined) ? this.response : xhr.responseText;
+                cbSuccess(xhr);
+            } else {
+                (cbError||cbEmpty)();
+            }
+            xhr = null;
+        };
+        xhr.send();
+    };
 
-	return function(url, cbSuccess, cbError) {
-			sendRequest(url, cbSuccess, cbError);
-	};
+    return function(url, cbSuccess, cbError) {
+        sendRequest(url, cbSuccess, cbError);
+    };
 }());

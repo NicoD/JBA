@@ -147,6 +147,10 @@
         this.to = function(to) {
             storage.position = to;
         };
+        
+        this.getPosition = function() {
+            return storage.position;
+        };
          
         this.isUnsignedIntValid = function(value) {
             return !(value < MIN_UINT || value > MAX_UINT);
