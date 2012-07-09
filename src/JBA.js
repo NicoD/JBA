@@ -36,12 +36,12 @@
  *  - boolean
  *  - bytes
  * 
- * compatible CommonJs
+ * compatible AMD/requirejs
  */
-(function(exports) {
+define(function() {
     "use strict";
 
-    /*jslint bitwise: true, plusplus: true*/
+    /*jslint bitwise:true, plusplus:true*/
 
     var BIG_ENDIAN = 0,
         LITTLE_ENDIAN = 1,
@@ -401,30 +401,62 @@
             return buf;
         };
     };
-        
-    // arguments can be
-    //  - input (string | ArrayBuffer)
-    //  - byteOrder (BIG_ENDIAN, LITTLE_ENDIAN)
-    //  - input, byteOrder
-    exports.create = function(arg1, arg2) {
-        var input, byteOrder;
-        if(arg1 && !arg2) {
-            if(arg1 === BIG_ENDIAN || arg1 === LITTLE_ENDIAN) {
-                byteOrder = arg1;
-            } else {
+  
+
+      
+    return {      
+        // arguments can be
+        //  - input (string | ArrayBuffer)
+        //  - byteOrder (BIG_ENDIAN, LITTLE_ENDIAN)
+        //  - input, byteOrder
+        create: function(arg1, arg2) {
+            var input, byteOrder;
+            if(arg1 && !arg2) {
+                if(arg1 === BIG_ENDIAN || arg1 === LITTLE_ENDIAN) {
+                    byteOrder = arg1;
+                } else {
+                    input = arg1;
+                }
+            } else if(arg1 && arg2) {
                 input = arg1;
+                byteOrder = arg2;
             }
-        } else if(arg1 && arg2) {
-            input = arg1;
-            byteOrder = arg2;
-        }
-        return new ByteArray(input, byteOrder);
-    };
-    exports.BIG_ENDIAN = BIG_ENDIAN;
-    exports.LITTLE_ENDIAN = LITTLE_ENDIAN;
+            return new ByteArray(input, byteOrder);
+        },
+        
+        sendRequest: function(url, cbSuccess, cbError) {
+
+            var xhr = null;
+            if (window.ActiveXObject) {
+                xhr = new ActiveXObject("Microsoft.XMLHTTP");
+            } else if (window.XMLHttpRequest) {
+                xhr = new XMLHttpRequest();
+            }
+
+            xhr.open("GET", url, true);
+            if(xhr.responseType !== undefined) {
+                xhr.responseType = 'arraybuffer';
+            }
+            if(xhr.overrideMimeType) {
+                xhr.overrideMimeType('text/plain; charset=x-user-defined');
+            }
+            
+            xhr.onload = function() {
+                if (xhr.status === 200 || xhr.status === 206 || xhr.status === 0) {
+                    xhr.binaryResponse = (xhr.responseType !== undefined) ? this.response : xhr.responseText;
+                    cbSuccess(xhr);
+                } else {
+                    if(cbError) { cbError(); }
+                }
+                xhr = null;
+            };
+            xhr.send();
+        },
+                
+        BIG_ENDIAN: BIG_ENDIAN,
+        LITTLE_ENDIAN: LITTLE_ENDIAN,
     
-    exports.INT_BYTE_SIZE = 4;
-    exports.SHORT_BYTE_SIZE = 2; 
-    
-// this line permit to use the nodejs module export or add the module to a new namespace
-}((function() { "use strict"; return (typeof exports === 'undefined') ? (function(){ window.JBA = {}; return window.JBA; }()) : exports; }())));
+        INT_BYTE_SIZE: 4,
+        SHORT_BYTE_SIZE: 2
+   };
+});

@@ -1,4 +1,8 @@
-(function() {
+requirejs.config({
+    baseUrl: '../bin'
+});
+
+require(["JBA"], function(JBA) {
     "use strict";
 
     /*jslint plusplus: true*/
@@ -581,7 +585,7 @@
         
     // see TestEncoder.java
     asyncTest( "read javaFile", function() {
-        JBAjax(JBA_URL+"test/bjava.dat", 
+        JBA.sendRequest(JBA_URL+"test/bjava.dat", 
             function(ob) {
                 var i, jba = JBA.create(ob.response);
                 for (i=-128; i<=127; i++) {
@@ -604,7 +608,7 @@
     
     //see TestEncoder.as
     asyncTest( "read as3File", function() {
-        JBAjax(JBA_URL+"test/bas3.dat", 
+        JBA.sendRequest(JBA_URL+"test/bas3.dat", 
             function(ob) {
                 var jba = JBA.create(ob.response);
                 ok(jba.readByte() === -128);
@@ -631,7 +635,7 @@
     
     // test JBAjax 404
     asyncTest( "test 404", function() {
-        JBAjax(JBA_URL+"test/404", 
+        JBA.sendRequest(JBA_URL+"test/404", 
             function() {
                 ok(false);
                 start();		
@@ -643,4 +647,4 @@
         );
     });
     
-}());
+});

@@ -22,6 +22,9 @@ Also, the code has not be yet optimize.
 The project build use google closure compiler to minify/optimize the src into the bin directory.
 There is a build.xml.example file to contains the closure compiler configuration
 
+The module are loaded using requirejs
+
+
 ###Compatiblity###
 
  * Chrome 20.0 and >
@@ -59,7 +62,7 @@ The basic test configuration runs with http://localhost/test/test.html
  * handle JBA input as ArrayBuffer (**DONE**)
  * add read/write bytes methods (**DONE**)
  * support Little Endian byte order (**DONE**)
- 
+ * requirejs compatiblity (**DONE**)
  * add  UTF-8 / UTF16 writing methods
  * optimize operations
  * compatibility with IE (JBAjax)

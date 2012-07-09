@@ -9,7 +9,6 @@
 				debug="false" output="bin/JBA.js">
 				<sources dir="src">
 					<file name="JBA.js"/>
-					<file name="JBAjax.js"/>
 				</sources>
 			</jscomp>
 		</target>
